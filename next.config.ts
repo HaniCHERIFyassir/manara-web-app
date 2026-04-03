@@ -19,6 +19,15 @@ function packageRoot(startDir: string): string {
 }
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+    ],
+  },
   turbopack: {
     // Walk up from cwd so this stays correct even if the shell is in a subfolder.
     root: packageRoot(process.cwd()),
