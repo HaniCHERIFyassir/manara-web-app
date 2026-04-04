@@ -14,7 +14,6 @@ const sources = {
   stacked: "/images/logo-manara-stacked.png",
 } as const;
 
-/** Logo officiel Manara Network (fichiers dans `/public/images/`). */
 export function ManaraLogo({
   variant = "horizontal",
   className,

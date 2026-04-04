@@ -64,7 +64,7 @@ export default function HomePage() {
                 Pour les employeurs
               </Link>
               <Link
-                href="/#fournisseurs"
+                href="/rejoindre-le-reseau"
                 className={cn(
                   buttonVariants({ variant: "outline", size: "lg" }),
                   "inline-flex h-12 min-w-[11rem] items-center justify-center rounded-md border-[#0a192f]/25 bg-white text-[#0a192f] hover:bg-[#f4f7fb]"
@@ -248,13 +248,13 @@ export default function HomePage() {
             partenaires.
           </p>
           <Link
-            href="mailto:contact@manara.network"
+            href="/rejoindre-le-reseau"
             className={cn(
               buttonVariants({ size: "lg" }),
               "mt-8 inline-flex h-12 rounded-md bg-[#0a192f] px-8 text-white hover:bg-[#152a45]"
             )}
           >
-            Nous contacter
+            Nous rejoindre
           </Link>
         </div>
       </section>

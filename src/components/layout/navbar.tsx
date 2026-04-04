@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/#a-propos", label: "À propos" },
   { href: "/#avantages", label: "Avantages" },
   { href: "/#partenaires", label: "Partenaires" },
+  { href: "/rejoindre-le-reseau", label: "Rejoindre" },
 ] as const;
 
 function ClaimStamp({ className }: { className?: string }) {
