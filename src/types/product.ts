@@ -9,5 +9,5 @@ export type Product = {
   minParticipants: number;
   currentParticipants: number;
   endDate: string;
-  tenantId?: string;
+  tenantIds?: string[];
 };

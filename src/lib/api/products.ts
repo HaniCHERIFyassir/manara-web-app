@@ -39,13 +39,57 @@ const mockProducts: Product[] = [
   }
 ];
 
+const LOCAL_STORAGE_KEY = "manara_products";
+
+function getStoredProducts(): Product[] {
+  if (typeof window === "undefined") return mockProducts;
+  const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mockProducts));
+  return mockProducts;
+}
+
+export async function fetchAllProducts(): Promise<Product[]> {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return getStoredProducts();
+}
+
 export async function getProductsByTenant(tenantId?: string): Promise<Product[]> {
   await new Promise(resolve => setTimeout(resolve, 600));
-  // Filter products based on tenantId if required in the future
-  return mockProducts.filter(p => !p.tenantId || p.tenantId === tenantId);
+  const products = getStoredProducts();
+  return products.filter(p => !p.tenantIds || p.tenantIds.length === 0 || (tenantId && p.tenantIds.includes(tenantId)));
 }
 
 export async function fetchProductById(id: string): Promise<Product | null> {
   await new Promise(resolve => setTimeout(resolve, 400));
-  return mockProducts.find(p => p.id === id) || null;
+  const products = getStoredProducts();
+  return products.find(p => p.id === id) || null;
+}
+
+export async function addProduct(product: Product): Promise<Product> {
+  if (typeof window !== "undefined") {
+    const existing = getStoredProducts();
+    const newStored = [...existing, product];
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newStored));
+  }
+  return product;
+}
+
+export async function updateProduct(updatedProduct: Product): Promise<Product> {
+  if (typeof window !== "undefined") {
+    const existing = getStoredProducts();
+    const newStored = existing.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newStored));
+  }
+  return updatedProduct;
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+  if (typeof window !== "undefined") {
+    const existing = getStoredProducts();
+    const newStored = existing.filter(p => p.id !== id);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newStored));
+  }
 }

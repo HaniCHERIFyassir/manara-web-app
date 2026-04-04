@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingCart } from "lucide-react";
 
 import { ManaraLogo } from "@/components/brand/manara-logo";
@@ -25,6 +26,11 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, tenant, logout } = useAuth();
   const { totalItems } = useCart();
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const primaryColor = tenant?.branding?.primaryColor || "#0a192f";
 

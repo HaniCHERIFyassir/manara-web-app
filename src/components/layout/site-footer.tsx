@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function LinkedInGlyph({ className }: { className?: string }) {
   return (
@@ -15,6 +18,12 @@ function LinkedInGlyph({ className }: { className?: string }) {
 }
 
 export function SiteFooter() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="border-t border-[var(--brand-border)] bg-[var(--brand-surface)] px-4 py-12 sm:px-6">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">

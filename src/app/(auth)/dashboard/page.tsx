@@ -11,6 +11,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Users, TrendingUp, Clock, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Countdown } from "@/components/ui/countdown";
 
 export default function DashboardPage() {
   const { user, tenant } = useAuth();
@@ -123,6 +124,9 @@ export default function DashboardPage() {
                       {product.category}
                     </Badge>
                   </div>
+                  <div className="absolute top-2 right-2">
+                    <Countdown endDate={product.endDate} />
+                  </div>
                   {isFull && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
                       <Badge className="bg-green-500 text-white border-none px-3 py-1 font-bold">Prix de groupe atteint !</Badge>
@@ -165,10 +169,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-[10px] font-medium text-[#5c6b7a]">
-                    <Clock className="size-3" />
-                    <span>L&apos;offre expire le {new Date(product.endDate).toLocaleDateString("fr-FR")}</span>
-                  </div>
                 </CardContent>
                 
                 <CardFooter className="p-4 pt-0">

@@ -8,18 +8,35 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+import { submitLead, LeadType } from "@/lib/api/leads";
+
 type FormType = "company" | "vendor";
 
+
 export default function JoinNetworkPage() {
-  const [formType, setFormType] = useState<FormType>("company");
+  const [formType, setFormType] = useState<LeadType>("partner");
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    companyName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await submitLead({
+      type: formType,
+      companyName: formData.companyName,
+      contactName: `${formData.firstName} ${formData.lastName}`.trim(),
+      email: formData.email,
+      phone: formData.phone,
+      message: formData.message,
+    });
     setIsLoading(false);
     setSubmitted(true);
   };
@@ -74,10 +91,10 @@ export default function JoinNetworkPage() {
             <div className="inline-flex rounded-lg border border-[var(--brand-border)] bg-white p-1 shadow-sm">
               <button
                 type="button"
-                onClick={() => setFormType("company")}
+                onClick={() => setFormType("partner")}
                 className={cn(
                   "px-6 py-2 text-sm font-medium transition-all rounded-md",
-                  formType === "company"
+                  formType === "partner"
                     ? "bg-[#0a192f] text-white shadow-sm"
                     : "text-[#5c6b7a] hover:text-[#0a192f]"
                 )}
@@ -86,10 +103,10 @@ export default function JoinNetworkPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setFormType("vendor")}
+                onClick={() => setFormType("retailer")}
                 className={cn(
                   "px-6 py-2 text-sm font-medium transition-all rounded-md",
-                  formType === "vendor"
+                  formType === "retailer"
                     ? "bg-[#0a192f] text-white shadow-sm"
                     : "text-[#5c6b7a] hover:text-[#0a192f]"
                 )}
@@ -102,7 +119,7 @@ export default function JoinNetworkPage() {
           <Card className="border-[var(--brand-border)] bg-white/80 shadow-2xl backdrop-blur-xl">
             <CardHeader className="border-b border-[var(--brand-border)]/50 pb-8 sm:px-8 sm:pt-8">
               <div className="flex items-center gap-3 text-[#0a192f]">
-                {formType === "company" ? <Building2 className="size-6 text-[#5b7fa3]" /> : <Globe className="size-6 text-[#5b7fa3]" />}
+                {formType === "partner" ? <Building2 className="size-6 text-[#5b7fa3]" /> : <Globe className="size-6 text-[#5b7fa3]" />}
                 <CardTitle className="text-xl">Formulaire de partenariat</CardTitle>
               </div>
               <CardDescription>
@@ -131,19 +148,19 @@ export default function JoinNetworkPage() {
                     <div className="grid gap-6 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-[#0a192f]">Prénom</label>
-                        <Input placeholder="Votre prénom" className="h-11 border-[var(--brand-border)]" />
+                        <Input value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} placeholder="Votre prénom" className="h-11 border-[var(--brand-border)]" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-[#0a192f]">Nom *</label>
-                        <Input placeholder="Votre nom" required className="h-11 border-[var(--brand-border)]" />
+                        <Input value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} placeholder="Votre nom" required className="h-11 border-[var(--brand-border)]" />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-[#0a192f]">
-                        {formType === "company" ? "Entreprise *" : "Raison sociale *"}
+                        {formType === "partner" ? "Entreprise *" : "Raison sociale *"}
                       </label>
-                      <Input placeholder="Nom de la structure" required className="h-11 border-[var(--brand-border)]" />
+                      <Input value={formData.companyName} onChange={e => setFormData({...formData, companyName: e.target.value})} placeholder="Nom de la structure" required className="h-11 border-[var(--brand-border)]" />
                     </div>
 
                     <div className="space-y-2">
@@ -160,6 +177,8 @@ export default function JoinNetworkPage() {
                       <label className="text-sm font-medium text-[#0a192f]">Message *</label>
                       <textarea
                         required
+                        value={formData.message}
+                        onChange={e => setFormData({...formData, message: e.target.value})}
                         placeholder="Comment pouvons-nous vous aider ?"
                         className="min-h-[120px] w-full rounded-lg border border-[var(--brand-border)] bg-transparent px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none"
                       />
@@ -208,7 +227,7 @@ export default function JoinNetworkPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-[#0a192f]">Adresse E-Mail *</label>
                       <div className="relative">
-                        <Input type="email" placeholder="contact@entreprise.com" required className="h-11 pl-10 border-[var(--brand-border)]" />
+                        <Input value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} type="email" placeholder="contact@entreprise.com" required className="h-11 pl-10 border-[var(--brand-border)]" />
                         <Mail className="absolute top-3 left-3 size-5 text-[#5c6b7a]" />
                       </div>
                     </div>
@@ -216,7 +235,7 @@ export default function JoinNetworkPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-[#0a192f]">Téléphone</label>
                       <div className="relative">
-                        <Input type="tel" placeholder="+213..." className="h-11 pl-10 border-[var(--brand-border)]" />
+                        <Input value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} type="tel" placeholder="+213..." className="h-11 pl-10 border-[var(--brand-border)]" />
                         <Phone className="absolute top-3 left-3 size-5 text-[#5c6b7a]" />
                       </div>
                     </div>
