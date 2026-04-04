@@ -40,6 +40,15 @@ const stats = [
   { value: "∞", label: "Offres négociées en volume" },
 ] as const;
 
+const partnerLogos = [
+  { name: "Yassir", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Yassir_Logo.png/512px-Yassir_Logo.png" },
+  { name: "Djezzy", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Djezzy_logo.svg/512px-Djezzy_logo.svg.png" },
+  { name: "Ooredoo", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Ooredoo_Logo.svg/512px-Ooredoo_Logo.svg.png" },
+  { name: "Sonatrach", url: "https://upload.wikimedia.org/wikipedia/fr/thumb/5/53/Sonatrach_Logo.svg/512px-Sonatrach_Logo.svg.png" },
+  { name: "Condor", url: "https://upload.wikimedia.org/wikipedia/fr/a/a2/Condor_Logo.png" },
+  { name: "Air Algérie", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Air_Algerie_logo.svg/512px-Air_Algerie_logo.svg.png" },
+];
+
 export default function HomePage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
@@ -277,47 +286,37 @@ export default function HomePage() {
 
       <section
         id="partenaires"
-        className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
+        className="scroll-mt-24 border-t border-[var(--brand-border)] bg-white py-16 sm:py-20 lg:py-24"
       >
         <div className="mx-auto max-w-6xl">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-2xl text-center px-4">
             <h2 className="font-heading text-2xl font-bold text-[#0a192f] sm:text-3xl">
-              Une sélection de nos partenaires
+              Ils nous font confiance
             </h2>
             <p className="mt-3 text-sm text-[#5c6b7a] sm:text-base">
-              Des organisations de premier plan nous font confiance pour leurs
-              équipes.
+              Des organisations de premier plan ont rejoint le réseau Manara pour renforcer le pouvoir d&apos;achat de leurs collaborateurs.
             </p>
           </div>
-          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {partnerCompanies.map((company) => (
-              <li key={company.id}>
-                <Card className="h-full border-[var(--brand-border)] bg-white shadow-sm ring-0 transition-shadow hover:shadow-md">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                    <div
-                      className="flex size-12 shrink-0 items-center justify-center rounded-md border border-[var(--brand-border)] bg-[var(--brand-surface)] font-heading text-lg font-bold text-[#0a192f]"
-                      aria-hidden
-                    >
-                      {company.initials}
-                    </div>
-                    <div className="min-w-0">
-                      <CardTitle className="text-base text-[#0a192f]">
-                        {company.name}
-                      </CardTitle>
-                      <CardDescription className="text-[#5c6b7a]">
-                        {company.sector}
-                      </CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <p className="text-xs text-[#5c6b7a]/90">
-                      Portail salariés et offres groupées
-                    </p>
-                  </CardContent>
-                </Card>
-              </li>
-            ))}
-          </ul>
+
+          {/* Marquee Section */}
+          <div className="relative mt-16 flex overflow-hidden marquee-mask py-4">
+            <div className="animate-marquee flex items-center gap-16 md:gap-24">
+              {[...partnerLogos, ...partnerLogos].map((logo, idx) => (
+                <div 
+                  key={`${logo.name}-${idx}`} 
+                  className="flex w-32 shrink-0 items-center justify-center grayscale opacity-50 transition-all duration-300 hover:grayscale-0 hover:opacity-100"
+                >
+                  <Image
+                    src={logo.url}
+                    alt={logo.name}
+                    width={140}
+                    height={60}
+                    className="h-auto w-full object-contain max-h-[50px]"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </main>
