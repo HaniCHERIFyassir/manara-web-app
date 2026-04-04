@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
@@ -11,6 +13,9 @@ import {
 } from "@/components/ui/card";
 import { partnerCompanies } from "@/data/partners";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const employerBenefits = [
   "Un portail digital exclusif et sécurisé",
@@ -36,6 +41,17 @@ const stats = [
 ] as const;
 
 export default function HomePage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || user) return null;
+
   return (
     <main className="flex flex-1 flex-col">
       {/* Hero — type corporate-benefits.eu : titre fort, sous-texte, 2 CTA, visuel */}

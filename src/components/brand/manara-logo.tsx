@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 type ManaraLogoProps = {
   variant?: "horizontal" | "stacked";
@@ -23,23 +23,18 @@ export function ManaraLogo({
   const isHorizontal = variant === "horizontal";
 
   return (
-    <Link
-      href="/#accueil"
-      className={className}
-      aria-label="Manara Network — accueil"
-    >
-      <Image
-        src={src}
-        alt="Manara Network"
-        width={isHorizontal ? 200 : 120}
-        height={isHorizontal ? 48 : 100}
-        className={
-          isHorizontal
-            ? "h-9 w-auto sm:h-10"
-            : "h-16 w-auto sm:h-[4.5rem]"
-        }
-        priority={priority}
-      />
-    </Link>
+    <Image
+      src={src}
+      alt="Manara Network"
+      width={isHorizontal ? 200 : 120}
+      height={isHorizontal ? 48 : 100}
+      className={cn(
+        isHorizontal
+          ? "h-9 w-auto sm:h-10"
+          : "h-16 w-auto sm:h-[4.5rem]",
+        className
+      )}
+      priority={priority}
+    />
   );
 }

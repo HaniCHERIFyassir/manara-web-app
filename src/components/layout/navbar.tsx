@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 
 import { ManaraLogo } from "@/components/brand/manara-logo";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { useCart } from "@/lib/cart-context";
+import { CartSheet } from "@/components/cart/cart-sheet";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 const navLinks = [
   { href: "/#accueil", label: "Accueil" },
@@ -17,128 +21,160 @@ const navLinks = [
   { href: "/rejoindre-le-reseau", label: "Rejoindre" },
 ] as const;
 
-function ClaimStamp({ className }: { className?: string }) {
-  return (
-    <p
-      className={cn(
-        "rounded-sm border border-[#c5d4e5] bg-[#eef3f9] px-3 py-1.5 text-center text-[0.65rem] font-semibold uppercase leading-tight tracking-wide text-[#0a192f] sm:text-[0.7rem]",
-        className
-      )}
-    >
-      Toujours 100&nbsp;% gratuit pour les employeurs
-    </p>
-  );
-}
-
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { user, tenant, logout } = useAuth();
+  const { totalItems } = useCart();
+
+  const primaryColor = tenant?.branding?.primaryColor || "#0a192f";
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--brand-border)] bg-white/95 backdrop-blur-md">
       <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
-        <div className="flex flex-col gap-3 sm:gap-2">
-          <div className="flex items-center gap-3">
-            <ManaraLogo priority className="shrink-0" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/" onClick={(e) => user && e.preventDefault()}>
+              <ManaraLogo priority className="shrink-0" />
+            </Link>
 
-            <div className="hidden min-w-0 flex-1 max-md:hidden" aria-hidden />
-
-            <div className="hidden shrink-0 max-md:hidden">
-              <ClaimStamp />
-            </div>
-
-            <nav
-              className="ml-auto hidden items-center gap-7 max-md:ml-auto md:flex"
-              aria-label="Principal"
-            >
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm font-medium text-[#0a192f]/75 transition-colors hover:text-[#0a192f]"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="ml-auto flex items-center gap-2 md:ml-0 md:shrink-0">
-              <Link
-                href="/login"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "default" }),
-                  "hidden text-[#0a192f]/80 hover:bg-[#f4f7fb] hover:text-[#0a192f] sm:inline-flex"
-                )}
-              >
-                Connexion
-              </Link>
-              <Link
-                href="/register"
-                className={cn(
-                  buttonVariants({ size: "default" }),
-                  "hidden bg-[#0a192f] text-white hover:bg-[#152a45] sm:inline-flex"
-                )}
-              >
-                S&apos;inscrire
-              </Link>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-[#0a192f] md:hidden"
-                aria-expanded={open}
-                aria-controls="mobile-menu"
-                aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-                onClick={() => setOpen((v) => !v)}
-              >
-                {open ? <X className="size-5" /> : <Menu className="size-5" />}
-              </Button>
-            </div>
+            {/* Hide links for authenticated users */}
+            {!user && (
+              <nav className="hidden items-center gap-7 md:flex" aria-label="Principal">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm font-medium text-[#0a192f]/75 transition-colors hover:text-[#0a192f]"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            )}
           </div>
 
-          <div className="flex justify-end md:hidden">
-            <ClaimStamp className="max-w-[12rem]" />
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                <div className="hidden flex-col items-end sm:flex leading-tight text-right">
+                  <span className="text-sm font-bold text-[#0a192f]">
+                    {user.firstName ? `${user.firstName} ${user.lastName || ""}` : user.email}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider font-bold" style={{ color: primaryColor }}>
+                    {tenant?.name}
+                  </span>
+                </div>
+
+                <Dialog>
+                  <DialogTrigger render={
+                    <Button variant="ghost" size="icon" className="relative group">
+                      <ShoppingCart className="size-5 text-[#0a192f]" />
+                      {totalItems > 0 && (
+                        <span 
+                          className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-white"
+                          style={{ backgroundColor: primaryColor }}
+                        >
+                          {totalItems}
+                        </span>
+                      )}
+                    </Button>
+                  } />
+                  <CartSheet />
+                </Dialog>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="hidden sm:flex border-[#0a192f]/10 text-[#0a192f] hover:bg-[#f4f7fb] text-xs font-bold"
+                >
+                  Déconnexion
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-[#0a192f] md:hidden"
+                  onClick={() => setOpen((v) => !v)}
+                >
+                  {open ? <X className="size-5" /> : <Menu className="size-5" />}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className={cn(
+                    buttonVariants({ size: "default" }),
+                    "bg-[#0a192f] text-white hover:bg-[#152a45] rounded-full px-6"
+                  )}
+                >
+                  Connexion
+                </Link>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-[#0a192f] md:hidden"
+                  onClick={() => setOpen((v) => !v)}
+                >
+                  {open ? <X className="size-5" /> : <Menu className="size-5" />}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {open ? (
-        <div
-          id="mobile-menu"
-          className="border-t border-[var(--brand-border)] bg-white px-4 py-4 md:hidden"
-        >
-          <nav className="flex flex-col gap-1" aria-label="Mobile">
-            {navLinks.map((link) => (
+      {/* Mobile Menu */}
+      {open && (
+        <div className="border-t border-[var(--brand-border)] bg-white px-4 py-4 md:hidden">
+          <nav className="flex flex-col gap-1">
+            {!user ? (
+              navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-lg px-3 py-2.5 text-sm text-[#0a192f]/80 hover:bg-[#f4f7fb]"
+                  onClick={() => setOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))
+            ) : (
+              <div className="px-3 py-2 border-b mb-2">
+                <p className="text-sm font-bold text-[#0a192f]">{user.firstName} {user.lastName}</p>
+                <p className="text-xs text-[#5c6b7a]">{tenant?.name}</p>
+              </div>
+            )}
+            <hr className="my-2 border-[var(--brand-border)]" />
+            {user ? (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  logout();
+                  setOpen(false);
+                }}
+                className="justify-start px-3 h-10 text-[#0a192f] hover:bg-[#f4f7fb]"
+              >
+                Déconnexion
+              </Button>
+            ) : (
               <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-lg px-3 py-2.5 text-sm text-[#0a192f]/80 hover:bg-[#f4f7fb]"
+                href="/login"
+                className={cn(
+                  buttonVariants({ size: "default" }),
+                  "mt-1 justify-center bg-[#0a192f] text-white hover:bg-[#152a45]"
+                )}
                 onClick={() => setOpen(false)}
               >
-                {link.label}
+                Connexion
               </Link>
-            ))}
-            <hr className="my-2 border-[var(--brand-border)]" />
-            <Link
-              href="/login"
-              className="rounded-lg px-3 py-2.5 text-sm text-[#0a192f]/80 hover:bg-[#f4f7fb]"
-              onClick={() => setOpen(false)}
-            >
-              Connexion
-            </Link>
-            <Link
-              href="/register"
-              className={cn(
-                buttonVariants({ size: "default" }),
-                "mt-1 justify-center bg-[#0a192f] text-white hover:bg-[#152a45]"
-              )}
-              onClick={() => setOpen(false)}
-            >
-              S&apos;inscrire
-            </Link>
+            )}
           </nav>
         </div>
-      ) : null}
+      )}
     </header>
   );
 }

@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
+import { AuthProvider } from "@/lib/auth-context";
+import { CartProvider } from "@/lib/cart-context";
+import { Navbar } from "@/components/layout/navbar";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 import "./globals.css";
 
@@ -33,7 +37,13 @@ export default function RootLayout({
       className={`${display.variable} ${sans.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-[var(--background)] font-[family-name:var(--font-body)] text-[var(--foreground)]">
-        {children}
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
+            <div className="flex flex-1 flex-col">{children}</div>
+            <SiteFooter />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
