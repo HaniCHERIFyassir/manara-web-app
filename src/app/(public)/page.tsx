@@ -41,12 +41,10 @@ const stats = [
 ] as const;
 
 const partnerLogos = [
-  { name: "Yassir", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Yassir_Logo.png/512px-Yassir_Logo.png" },
-  { name: "Djezzy", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Djezzy_logo.svg/512px-Djezzy_logo.svg.png" },
-  { name: "Ooredoo", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Ooredoo_Logo.svg/512px-Ooredoo_Logo.svg.png" },
-  { name: "Sonatrach", url: "https://upload.wikimedia.org/wikipedia/fr/thumb/5/53/Sonatrach_Logo.svg/512px-Sonatrach_Logo.svg.png" },
-  { name: "Condor", url: "https://upload.wikimedia.org/wikipedia/fr/a/a2/Condor_Logo.png" },
-  { name: "Air Algérie", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Air_Algerie_logo.svg/512px-Air_Algerie_logo.svg.png" },
+  { name: "Condor", url: "/images/condor.png" },
+  { name: "Ooredoo", url: "/images/ooredoo.png" },
+  { name: "Air Algérie", url: "/images/air.png" },
+  { name: "Yassir", url: "/images/yassir.png" },
 ];
 
 export default function HomePage() {
@@ -138,8 +136,8 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-[var(--brand-surface)] shadow-sm">
             <Image
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80"
-              alt="Équipe en réunion"
+              src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80"
+              alt="Espace de travail moderne"
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -209,8 +207,8 @@ export default function HomePage() {
             <div className="flex flex-col gap-8 lg:flex-row-reverse lg:items-center">
               <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg bg-white shadow-sm lg:aspect-square lg:w-[240px]">
                 <Image
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80"
-                  alt="Collaboratrices au travail"
+                  src="https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=600&q=80"
+                  alt="Productivité et résultats"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 240px"
@@ -302,16 +300,15 @@ export default function HomePage() {
           <div className="relative mt-16 flex overflow-hidden marquee-mask py-4">
             <div className="animate-marquee flex items-center gap-16 md:gap-24">
               {[...partnerLogos, ...partnerLogos].map((logo, idx) => (
-                <div 
-                  key={`${logo.name}-${idx}`} 
-                  className="flex w-32 shrink-0 items-center justify-center grayscale opacity-50 transition-all duration-300 hover:grayscale-0 hover:opacity-100"
+                <div
+                  key={`${logo.name}-${idx}`}
+                  className="flex w-40 md:w-48 shrink-0 items-center justify-center grayscale opacity-50 transition-all duration-300 hover:grayscale-0 hover:opacity-100"
                 >
-                  <Image
+                  {/* Using standard img tag to bypass Wikimedia hotlinking block for next/image */}
+                  <img
                     src={logo.url}
                     alt={logo.name}
-                    width={140}
-                    height={60}
-                    className="h-auto w-full object-contain max-h-[50px]"
+                    className="h-auto w-full object-contain max-h-[80px]"
                   />
                 </div>
               ))}
