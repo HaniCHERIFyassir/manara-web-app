@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { cn } from "@/lib/utils";
 
 import { submitLead, LeadType } from "@/lib/api/leads";
+import { ALGERIAN_WILAYAS } from "@/lib/constants/wilayas";
 
 type FormType = "company" | "vendor";
 
@@ -24,6 +25,7 @@ export default function JoinNetworkPage() {
     email: "",
     phone: "",
     message: "",
+    wilaya: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -198,8 +200,23 @@ export default function JoinNetworkPage() {
                         <Input placeholder="16000" required className="h-11 border-[var(--brand-border)]" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-[#0a192f]">Wilaya / Région</label>
-                        <Input placeholder="Alger" className="h-11 border-[var(--brand-border)]" />
+                        <label className="text-sm font-medium text-[#0a192f]">Wilaya *</label>
+                        <div className="relative">
+                          <select
+                            required
+                            value={formData.wilaya}
+                            onChange={(e) => setFormData({ ...formData, wilaya: e.target.value })}
+                            className="h-11 w-full appearance-none rounded-lg border border-[var(--brand-border)] bg-white px-3 py-2 text-sm focus-visible:border-ring focus-visible:ring-3 outline-none"
+                          >
+                            <option value="">Sélectionnez une wilaya</option>
+                            {ALGERIAN_WILAYAS.map((wilaya) => (
+                              <option key={wilaya.id} value={wilaya.name}>
+                                {wilaya.name}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="pointer-events-none absolute top-3 right-3 size-4 text-[#5c6b7a]" />
+                        </div>
                       </div>
                     </div>
 
@@ -209,19 +226,17 @@ export default function JoinNetworkPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-[#0a192f]">Pays *</label>
+                      <label className="text-sm font-medium text-[#0a192f]">Pays</label>
                       <div className="relative">
                         <select
-                          required
-                          className="h-11 w-full appearance-none rounded-lg border border-[var(--brand-border)] bg-white px-3 py-2 text-sm focus-visible:border-ring focus-visible:ring-3 outline-none"
+                          disabled
+                          className="h-11 w-full appearance-none rounded-lg border border-[var(--brand-border)] bg-gray-50 px-3 py-2 text-sm outline-none cursor-not-allowed"
                         >
                           <option value="DZ">Algérie</option>
-                          <option value="FR">France</option>
-                          <option value="TN">Tunisie</option>
-                          <option value="MA">Maroc</option>
                         </select>
                         <ChevronDown className="pointer-events-none absolute top-3 right-3 size-4 text-[#5c6b7a]" />
                       </div>
+                      <p className="text-[10px] text-[#5c6b7a]">Nous ne supportons que l'Algérie pour le moment.</p>
                     </div>
 
                     <div className="space-y-2">

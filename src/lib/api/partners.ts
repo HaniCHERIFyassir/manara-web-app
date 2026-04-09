@@ -7,6 +7,7 @@ const mockPartners: PartnerCompany[] = [
     sector: "Énergie",
     initials: "S",
     domains: ["sonatrach.dz", "sonatrach.com"],
+    hrAdminEmail: "hr@sonatrach.dz",
     branding: {
       primaryColor: "#FF6600",
       welcomeMessage: "Bienvenue à la famille Sonatrach",
@@ -18,6 +19,7 @@ const mockPartners: PartnerCompany[] = [
     sector: "Télécommunications",
     initials: "O",
     domains: ["ooredoo.dz"],
+    hrAdminEmail: "admin@ooredoo.dz",
     branding: {
       primaryColor: "#ED1C24",
       welcomeMessage: "Bienvenue chez Ooredoo",
@@ -29,6 +31,7 @@ const mockPartners: PartnerCompany[] = [
     sector: "Télécommunications",
     initials: "D",
     domains: ["djezzy.dz"],
+    hrAdminEmail: "hr@djezzy.dz",
     branding: {
       primaryColor: "#FF0000",
       welcomeMessage: "Bienvenue chez la communauté Djezzy",

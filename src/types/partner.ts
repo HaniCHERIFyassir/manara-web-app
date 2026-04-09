@@ -4,6 +4,8 @@ export type PartnerCompany = {
   sector: string;
   initials: string;
   domains: string[]; // e.g. ["sonatrach.dz", "sonatrach.com"]
+  hrAdminEmail?: string; // Specific email that sees statistics
+  logoUrl?: string;
   branding?: {
     primaryColor?: string;
     secondaryColor?: string;
@@ -23,6 +25,7 @@ export type UserProfile = {
     zip: string;
     state?: string;
   };
+  role: "employee" | "hr_admin";
   onboardingCompleted: boolean;
   tenantId: string;
 };

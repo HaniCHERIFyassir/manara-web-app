@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Phone, MapPin, Loader2, ArrowRight } from "lucide-react";
+import { Phone, MapPin, Loader2, ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth-context";
+import { ALGERIAN_WILAYAS } from "@/lib/constants/wilayas";
 
 export default function OnboardingPage() {
   const { user, updateOnboarding, isLoading: authLoading } = useAuth();
@@ -30,7 +31,7 @@ export default function OnboardingPage() {
     }
   }, [user, authLoading, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -163,15 +164,24 @@ export default function OnboardingPage() {
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="state" className="text-sm font-medium text-[#0a192f]">Wilaya</label>
-                    <Input
-                      id="state"
-                      name="state"
-                      required
-                      value={formData.state}
-                      onChange={handleChange}
-                      placeholder="Alger"
-                      className="h-11 border-[var(--brand-border)]"
-                    />
+                    <div className="relative">
+                      <select
+                        id="state"
+                        name="state"
+                        required
+                        value={formData.state}
+                        onChange={handleChange}
+                        className="h-11 w-full appearance-none rounded-lg border border-[var(--brand-border)] bg-white px-3 py-2 text-sm focus-visible:border-ring focus-visible:ring-3 outline-none"
+                      >
+                        <option value="">Sélectionnez une wilaya</option>
+                        {ALGERIAN_WILAYAS.map((wilaya) => (
+                          <option key={wilaya.id} value={wilaya.name}>
+                            {wilaya.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute top-3 right-3 size-4 text-[#5c6b7a]" />
+                    </div>
                   </div>
                 </div>
               </div>

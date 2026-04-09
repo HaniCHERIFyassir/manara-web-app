@@ -9,13 +9,15 @@ import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Users, TrendingUp, Clock, Loader2 } from "lucide-react";
+import { ShoppingCart, Users, TrendingUp, Clock, Loader2, Star, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Countdown } from "@/components/ui/countdown";
+import { QuantitySelector } from "@/components/ui/quantity-selector";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { user, tenant } = useAuth();
-  const { addItem } = useCart();
+  const { items, addItem, updateQuantity, removeItem } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,6 +53,27 @@ export default function DashboardPage() {
 
   return (
     <main className="flex-1 space-y-8 p-8 pt-6">
+      {/* New Premium Branding Bar */}
+      <div
+        className="w-full h-24 mb-6 rounded-2xl overflow-hidden shadow-lg flex items-center px-8 transition-all"
+        style={{ backgroundColor: primaryColor }}
+      >
+        <div className="bg-white px-6 py-2 rounded-xl shadow-md flex items-center justify-center min-w-[140px] h-[60px]">
+          {tenant?.logoUrl ? (
+            <div className="relative w-32 h-10">
+              <Image
+                src={tenant.logoUrl}
+                alt={tenant.name}
+                fill
+                className="object-contain"
+              />
+            </div>
+          ) : (
+            <span className="text-2xl font-black" style={{ color: primaryColor }}>{tenant?.name || "M"}</span>
+          )}
+        </div>
+      </div>
+
       {/* Header Section */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -61,131 +84,270 @@ export default function DashboardPage() {
             Voici les offres exclusives réservées aux employés de <span className="font-bold" style={{ color: primaryColor }}>{tenant?.name}</span>.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-[var(--brand-border)] bg-white px-4 py-2 shadow-sm">
-          <div 
-            className="h-3 w-3 rounded-full animate-pulse" 
-            style={{ backgroundColor: primaryColor }}
-          />
-          <span className="text-sm font-medium text-[#0a192f]">Session Corporate Active</span>
-        </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-[var(--brand-border)] bg-white shadow-sm transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-[#5c6b7a]">Économies réalisées</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-[#0a192f]">45,200 DA</div>
-            <p className="text-xs text-[#5c6b7a]">Total communauté {tenant?.name}</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-[var(--brand-border)] bg-white shadow-sm transition-all hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-[#5c6b7a]">Membres actifs</CardTitle>
-            <Users className="h-4 w-4 text-[#0a192f]" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-[#0a192f]">128</div>
-            <p className="text-xs text-[#5c6b7a]">Inscrit ce mois-ci</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Stats Section - Visible only to HR Admins */}
+      {user?.role === "hr_admin" && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="border-[var(--brand-border)] bg-white shadow-sm transition-all hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-[#5c6b7a]">Économies réalisées</CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-[#0a192f]">45,200 DA</div>
+              <p className="text-xs text-[#5c6b7a]">Total communauté {tenant?.name}</p>
+            </CardContent>
+          </Card>
 
-      {/* Products Grid */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[#0a192f]">Catalogue Exclusif</h2>
-          <Badge variant="outline" className="bg-[#f4f7fb] text-[#0a192f] border-[var(--brand-border)]">
-            {products.length} Offres disponibles
-          </Badge>
+          <Card className="border-[var(--brand-border)] bg-white shadow-sm transition-all hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-[#5c6b7a]">Membres actifs</CardTitle>
+              <Users className="h-4 w-4 text-[#0a192f]" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-[#0a192f]">128</div>
+              <p className="text-xs text-[#5c6b7a]">Inscrit ce mois-ci</p>
+            </CardContent>
+          </Card>
         </div>
+      )}
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => {
-            const progress = (product.currentParticipants / (product.minParticipants || 10)) * 100;
-            const isFull = progress >= 100;
+      {/* Products Catalog - Visible only to Employees */}
+      {user?.role !== "hr_admin" && (
+        <div className="space-y-12">
+          {/* Hero Section */}
+          {products.find(p => p.isHero) && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-[#0a192f] flex items-center gap-2">
+                <Star className="h-5 w-5 fill-[#FF6400] text-[#FF6400]" /> Offre Vedette
+              </h2>
+              {(() => {
+                const hero = products.find(p => p.isHero)!;
+                const progress = (hero.currentParticipants / (hero.minParticipants || 10)) * 100;
+                const cartItem = items.find(item => item.id === hero.id);
+                const quantityInCart = cartItem?.quantity || 0;
 
-            return (
-              <Card key={product.id} className="group flex flex-col overflow-hidden border-[var(--brand-border)] bg-white shadow-sm transition-all hover:shadow-lg hover:translate-y-[-2px]">
-                <div className="relative aspect-video overflow-hidden">
-                  <Image
-                    src={product.images[0] || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <Badge className="bg-white/90 backdrop-blur-sm text-[#0a192f] border-none text-[10px] font-bold uppercase shadow-sm">
-                      {product.category}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <Countdown endDate={product.endDate} />
-                  </div>
-                  {isFull && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-                      <Badge className="bg-green-500 text-white border-none px-3 py-1 font-bold">Prix de groupe atteint !</Badge>
+                return (
+                  <Card className="overflow-hidden border-2 border-red-100 shadow-xl transition-all hover:shadow-2xl">
+                    <div className="flex flex-col md:flex-row">
+                      <div className="relative aspect-video md:w-1/2 overflow-hidden bg-gray-100">
+                        <Link href={`/products/${hero.id}`}>
+                          <Image
+                            src={hero.images[0] || "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80"}
+                            alt={hero.name}
+                            fill
+                            className="object-cover transition-transform duration-700 hover:scale-105"
+                          />
+                        </Link>
+                      </div>
+                      <div className="p-8 md:w-1/2 flex flex-col justify-between space-y-6">
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <Badge className="mb-2 bg-red-100 text-red-600 hover:bg-red-200 border-none uppercase text-[10px] font-bold">
+                                {hero.category}
+                              </Badge>
+                              <Link href={`/products/${hero.id}`}>
+                                <CardTitle className="text-3xl font-extrabold text-[#0a192f] hover:text-red-500 transition-colors">
+                                  {hero.name}
+                                </CardTitle>
+                              </Link>
+                            </div>
+                          </div>
+                          <div className="flex items-baseline gap-3">
+                            <span className="text-4xl font-black text-red-600">{hero.price.toLocaleString()} DZD</span>
+                            {hero.retailPrice && (
+                              <span className="text-lg text-[#5c6b7a] line-through font-medium opacity-60">
+                                {hero.retailPrice.toLocaleString()} DZD
+                              </span>
+                            )}
+                          </div>
+                          <CardDescription className="text-base text-[#5c6b7a] leading-relaxed line-clamp-3">
+                            {hero.description}
+                          </CardDescription>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex justify-between text-sm font-bold text-[#0a192f]">
+                            <span>{hero.currentParticipants} inscrits</span>
+                            <span>Objectif: {hero.minParticipants}</span>
+                          </div>
+                          <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-red-500 transition-all duration-1000"
+                              style={{ width: `${Math.min(progress, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {quantityInCart === 0 ? (
+                          <Button
+                            className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black text-lg shadow-lg shadow-red-200 uppercase tracking-wider"
+                            onClick={() => addItem(hero)}
+                          >
+                            <ShoppingCart className="mr-3 h-6 w-6" />
+                            Profiter de l'offre
+                          </Button>
+                        ) : hero.maxQuantityPerUser === 1 ? (
+                          <Button
+                            variant="outline"
+                            className="w-full h-14 border-red-600 text-red-600 hover:bg-red-50 font-black text-lg uppercase tracking-wider transition-all"
+                            onClick={() => removeItem(hero.id)}
+                          >
+                            <Trash2 className="mr-3 h-6 w-6" />
+                            Retirer de l'offre
+                          </Button>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row items-center gap-6 bg-red-50 p-4 rounded-2xl border border-red-100">
+                            <div className="flex-1 text-center sm:text-left">
+                              <div className="text-[10px] uppercase font-bold text-red-600 mb-1">Quantité ajoutée</div>
+                              <div className="text-xl font-black text-[#0a192f]">{quantityInCart} article(s)</div>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                              <QuantitySelector
+                                quantity={quantityInCart}
+                                max={hero.maxQuantityPerUser}
+                                onChange={(val) => updateQuantity(hero.id, val)}
+                              />
+                              <div className="h-8 w-px bg-red-200 mx-2 hidden sm:block" />
+                              <Button
+                                variant="ghost"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-100/50 rounded-full h-12 w-12"
+                                onClick={() => removeItem(hero.id)}
+                              >
+                                <Trash2 className="h-6 w-6" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-                
-                <CardHeader className="p-4 flex-1">
-                  <div className="space-y-2">
-                    <CardTitle className="text-lg font-bold text-[#0a192f] line-clamp-1 group-hover:text-[var(--brand-primary)] transition-colors">
-                      {product.name}
-                    </CardTitle>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-xl font-bold text-[#0a192f]">{product.price.toLocaleString()} DA</span>
-                      <span className="text-xs text-[#5c6b7a] line-through font-medium">{(product.price * 1.25).toLocaleString()} DA</span>
-                      <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded ml-auto">-25%</span>
+                    {/* RED COUNTDOWN BAR */}
+                    <div className="bg-red-600 py-3 text-center">
+                      <div className="text-white text-2xl font-black tracking-[0.2em]">
+                        <Countdown endDate={hero.endDate} />
+                      </div>
                     </div>
-                    <CardDescription className="text-xs line-clamp-2 text-[#5c6b7a] leading-relaxed">
-                      {product.description}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="p-4 pt-0 space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-[#5c6b7a]">
-                      <span className="flex items-center gap-1">
-                        <Users className="size-3" /> {product.currentParticipants} inscrits
-                      </span>
-                      <span>Obj. {product.minParticipants}</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-[#f4f7fb] rounded-full overflow-hidden">
-                      <div 
-                        className="h-full transition-all duration-1000 ease-out" 
-                        style={{ 
-                          width: `${Math.min(progress, 100)}%`,
-                          backgroundColor: primaryColor
-                        }} 
+                  </Card>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* Featured Grid (4 products) */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-[#0a192f]">Autres Offres Actives</h2>
+              <Badge variant="outline" className="bg-[#f4f7fb] text-[#0a192f] border-gray-200">
+                {products.filter(p => !p.isHero).length} disponibles
+              </Badge>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {products.filter(p => !p.isHero).slice(0, 4).map((product) => {
+                const progress = (product.currentParticipants / (product.minParticipants || 10)) * 100;
+                const cartItem = items.find(item => item.id === product.id);
+                const quantityInCart = cartItem?.quantity || 0;
+
+                return (
+                  <Card key={product.id} className="group flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm transition-all hover:shadow-xl hover:translate-y-[-4px]">
+                    <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden bg-gray-50">
+                      <Image
+                        src={product.images[0] || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
                       />
-                    </div>
-                  </div>
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-white/90 backdrop-blur-sm text-[#0a192f] border-none text-[9px] font-bold uppercase">
+                          {product.category}
+                        </Badge>
+                      </div>
+                    </Link>
 
-                </CardContent>
-                
-                <CardFooter className="p-4 pt-0">
-                  <Button 
-                    className="w-full text-white font-bold transition-all hover:opacity-90 active:scale-[0.98]"
-                    style={{ backgroundColor: primaryColor }}
-                    onClick={() => addItem(product)}
-                  >
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Commander
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
+                    <CardHeader className="p-4 space-y-2">
+                      <Link href={`/products/${product.id}`}>
+                        <CardTitle className="text-base font-bold text-[#0a192f] line-clamp-1 hover:text-red-500 transition-colors">
+                          {product.name}
+                        </CardTitle>
+                      </Link>
+                      <div className="flex flex-col">
+                        <span className="text-xl font-black text-red-600">{product.price.toLocaleString()} DZD</span>
+                        {product.retailPrice && (
+                          <span className="text-[10px] text-[#5c6b7a] line-through font-medium opacity-60">
+                            {product.retailPrice.toLocaleString()} DZD
+                          </span>
+                        )}
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="p-4 pt-0 flex-1 flex flex-col justify-end space-y-4">
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[9px] font-black text-[#0a192f]">
+                          <span>{product.currentParticipants} inscrits</span>
+                          <span>{product.minParticipants}</span>
+                        </div>
+                        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-red-500 transition-all duration-1000"
+                            style={{ width: `${Math.min(progress, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 pt-2">
+                        {quantityInCart === 0 ? (
+                          <Button
+                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-10 uppercase text-xs"
+                            onClick={() => addItem(product)}
+                          >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Ajouter au panier
+                          </Button>
+                        ) : product.maxQuantityPerUser === 1 ? (
+                          <Button
+                            variant="outline"
+                            className="w-full border-red-600 text-red-600 hover:bg-red-50 font-bold h-10 uppercase text-xs"
+                            onClick={() => removeItem(product.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Retirer
+                          </Button>
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
+                            <QuantitySelector
+                              quantity={quantityInCart}
+                              max={product.maxQuantityPerUser}
+                              onChange={(val) => updateQuantity(product.id, val)}
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-red-500 rounded-full h-8 w-8 hover:bg-red-50"
+                              onClick={() => removeItem(product.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+
+                    {/* MINI COUNTDOWN BAR */}
+                    <div className="py-4 text-center mt-auto" style={{ backgroundColor: primaryColor }} >
+                      <div className="text-white text-xl font-black tracking-widest">
+                        <Countdown endDate={product.endDate} />
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

@@ -9,10 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Clock, Users, ArrowRight, Edit, Trash2 } from "lucide-react";
+import { Plus, Clock, Users, ArrowRight, Edit, Trash2, Image as ImageIcon, Star } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Countdown } from "@/components/ui/countdown";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,10 +25,12 @@ export default function AdminProductsPage() {
     category: "",
     price: "",
     retailPrice: "",
-    image: "",
+    images: ["", "", "", ""],
     minParticipants: "",
     daysUntilEnd: "7",
     tenantIds: [] as string[],
+    maxQuantityPerUser: "1",
+    isHero: false,
   });
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -57,25 +60,48 @@ export default function AdminProductsPage() {
       category: newProduct.category || "General",
       price: parseInt(newProduct.price),
       retailPrice: parseInt(newProduct.retailPrice) || undefined,
-      images: [newProduct.image || "https://images.unsplash.com/photo-1513116476489-7635e79feb27?auto=format&fit=crop&w=800&q=80"],
+      images: newProduct.images.filter(img => img !== ""),
+      maxQuantityPerUser: parseInt(newProduct.maxQuantityPerUser) || 1,
+      isHero: newProduct.isHero,
       minParticipants: parseInt(newProduct.minParticipants) || 10,
       currentParticipants: 0,
       endDate: endDate.toISOString(),
       tenantIds: newProduct.tenantIds.length > 0 ? newProduct.tenantIds : undefined,
     };
 
+    // If new product is Hero, remove Hero status from others
+    if (productToSave.isHero) {
+      const allProds = await fetchAllProducts();
+      for (const p of allProds) {
+        if (p.isHero) {
+          await updateProduct({ ...p, isHero: false });
+        }
+      }
+    }
+
     await addProduct(productToSave);
     await loadData();
     setIsDialogOpen(false);
     // Reset form
     setNewProduct({
-      name: "", description: "", category: "", price: "", retailPrice: "", image: "", minParticipants: "", daysUntilEnd: "7", tenantIds: []
+      name: "", description: "", category: "", price: "", retailPrice: "", images: ["", "", "", ""], minParticipants: "", daysUntilEnd: "7", tenantIds: [], maxQuantityPerUser: "1", isHero: false
     });
   };
 
   const handleEditProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
+    
+    // If edited product is Hero, remove Hero status from others
+    if (editingProduct.isHero) {
+      const allProds = await fetchAllProducts();
+      for (const p of allProds) {
+        if (p.isHero && p.id !== editingProduct.id) {
+          await updateProduct({ ...p, isHero: false });
+        }
+      }
+    }
+    
     await updateProduct(editingProduct);
     await loadData();
     setIsEditDialogOpen(false);
@@ -98,11 +124,9 @@ export default function AdminProductsPage() {
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-[#0a192f] text-white hover:bg-[#1e3a5f]">
-              <Plus className="mr-2 h-4 w-4" /> Ajouter une offre
-            </Button>
-          </DialogTrigger>
+          <Button onClick={() => setIsDialogOpen(true)} className="bg-[#0a192f] text-white hover:bg-[#1e3a5f]">
+            <Plus className="mr-2 h-4 w-4" /> Ajouter une offre
+          </Button>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Créer un nouvel achat groupé</DialogTitle>
@@ -132,9 +156,41 @@ export default function AdminProductsPage() {
                   <Input type="number" value={newProduct.retailPrice} onChange={e => setNewProduct({...newProduct, retailPrice: e.target.value})} />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">URL de l'image (Unsplash recommandé)</label>
-                <Input value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} placeholder="https://..." />
+               <div className="space-y-3">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" /> Photos du produit (Max 4 URLs)
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {newProduct.images.map((img, idx) => (
+                    <Input 
+                      key={idx} 
+                      placeholder={`URL Image ${idx + 1}`} 
+                      value={img} 
+                      onChange={e => {
+                        const imgs = [...newProduct.images];
+                        imgs[idx] = e.target.value;
+                        setNewProduct({...newProduct, images: imgs});
+                      }} 
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Quantité max / utilisateur</label>
+                  <Input type="number" min="1" value={newProduct.maxQuantityPerUser} onChange={e => setNewProduct({...newProduct, maxQuantityPerUser: e.target.value})} />
+                </div>
+                <div className="flex items-center space-x-2 pt-8">
+                  <Checkbox 
+                    id="isHero" 
+                    checked={newProduct.isHero} 
+                    onCheckedChange={(checked: boolean) => setNewProduct({...newProduct, isHero: !!checked})}
+                  />
+                  <label htmlFor="isHero" className="text-sm font-bold flex items-center gap-1 text-[#FF6400]">
+                    <Star className="h-3 w-3 fill-[#FF6400]" /> Produit Vedette (Hero)
+                  </label>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -224,9 +280,41 @@ export default function AdminProductsPage() {
                     <Input type="number" value={editingProduct.retailPrice || ""} onChange={e => setEditingProduct({...editingProduct, retailPrice: parseInt(e.target.value) || undefined})} />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">URL de l'image</label>
-                  <Input value={editingProduct.images[0] || ""} onChange={e => setEditingProduct({...editingProduct, images: [e.target.value]})} />
+                 <div className="space-y-3">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" /> Photos du produit (Max 4 URLs)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[0,1,2,3].map((idx) => (
+                      <Input 
+                        key={idx} 
+                        placeholder={`URL Image ${idx + 1}`} 
+                        value={editingProduct.images[idx] || ""} 
+                        onChange={e => {
+                          const imgs = [...editingProduct.images];
+                          imgs[idx] = e.target.value;
+                          setEditingProduct({...editingProduct, images: imgs});
+                        }} 
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Quantité max / utilisateur</label>
+                    <Input type="number" min="1" value={editingProduct.maxQuantityPerUser} onChange={e => setEditingProduct({...editingProduct, maxQuantityPerUser: parseInt(e.target.value)})} />
+                  </div>
+                  <div className="flex items-center space-x-2 pt-8">
+                    <Checkbox 
+                      id="editIsHero" 
+                      checked={editingProduct.isHero} 
+                      onCheckedChange={(checked: boolean) => setEditingProduct({...editingProduct, isHero: !!checked})}
+                    />
+                    <label htmlFor="editIsHero" className="text-sm font-bold flex items-center gap-1 text-[#FF6400]">
+                      <Star className="h-3 w-3 fill-[#FF6400]" /> Produit Vedette (Hero)
+                    </label>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -321,7 +409,10 @@ export default function AdminProductsPage() {
                           </span>
                         )}
                       </div>
-                      <CardTitle className="text-xl text-[#0a192f] font-bold">{product.name}</CardTitle>
+                       <CardTitle className="text-xl text-[#0a192f] font-bold flex items-center gap-2">
+                         {product.name}
+                         {product.isHero && <Star className="h-4 w-4 fill-[#FF6400] text-[#FF6400]" />}
+                       </CardTitle>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-[#0a192f]">{product.price.toLocaleString()} DA</div>

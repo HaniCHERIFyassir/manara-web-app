@@ -12,6 +12,7 @@ const mockProducts: Product[] = [
     minParticipants: 50,
     currentParticipants: 32,
     endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+    maxQuantityPerUser: 2,
   },
   {
     id: "prod-2",
@@ -24,6 +25,7 @@ const mockProducts: Product[] = [
     minParticipants: 30,
     currentParticipants: 12,
     endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 4).toISOString(),
+    maxQuantityPerUser: 1,
   },
   {
     id: "prod-3",
@@ -36,6 +38,8 @@ const mockProducts: Product[] = [
     minParticipants: 40,
     currentParticipants: 25,
     endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString(),
+    maxQuantityPerUser: 1,
+    isHero: true,
   }
 ];
 

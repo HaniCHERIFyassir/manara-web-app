@@ -21,7 +21,8 @@ export const partnerCompanies: PartnerCompany[] = [
     branding: {
        primaryColor: "#ED1C24",
        secondaryColor: "#FFFFFF",
-    }
+    },
+    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Ooredoo_logo.svg/1280px-Ooredoo_logo.svg.png"
   },
   {
     id: "djezzy",

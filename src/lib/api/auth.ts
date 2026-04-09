@@ -30,15 +30,20 @@ export async function login(email: string): Promise<{ user?: UserProfile; error?
     return { error: "Votre entreprise n'est pas encore partenaire de Manara Network." };
   }
 
-  // Simulate finding an existing user or creating a new one with pending onboarding
-  const isExistingUser = email.includes("demo"); // Dummy check for existing vs first-time
+  // Identify if the user is the HR Admin for this partner
+  const isHRAdmin = email.toLowerCase() === partner.hrAdminEmail?.toLowerCase();
+
+  // Simulate finding an existing user or creating a new one
+  const isExistingUser = email.includes("demo");
 
   const user: UserProfile = {
     email,
     tenantId: partner.id,
-    onboardingCompleted: isExistingUser,
-    firstName: isExistingUser ? "Prénom Demo" : undefined,
-    lastName: isExistingUser ? "Nom Demo" : undefined,
+    role: isHRAdmin ? "hr_admin" : "employee",
+    // HR Admins skip onboarding automatically
+    onboardingCompleted: isHRAdmin ? true : isExistingUser,
+    firstName: isExistingUser ? "Prénom Demo" : (isHRAdmin ? "Admin" : undefined),
+    lastName: isExistingUser ? "Nom Demo" : (isHRAdmin ? "RH" : undefined),
   };
 
   setStoredSession(user);

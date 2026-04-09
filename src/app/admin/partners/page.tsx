@@ -18,6 +18,7 @@ export default function AdminPartnersPage() {
     initials: "",
     domain: "",
     primaryColor: "#0a192f",
+    hrAdminEmail: "",
   });
   const [editingPartner, setEditingPartner] = useState<PartnerCompany | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -39,6 +40,7 @@ export default function AdminPartnersPage() {
       sector: newPartner.sector,
       initials: newPartner.initials,
       domains: [newPartner.domain],
+      hrAdminEmail: newPartner.hrAdminEmail,
       branding: {
         primaryColor: newPartner.primaryColor,
         welcomeMessage: `Bienvenue à la famille ${newPartner.name}`,
@@ -48,7 +50,7 @@ export default function AdminPartnersPage() {
     await addPartner(partnerToSave);
     await loadPartners();
     setIsDialogOpen(false);
-    setNewPartner({ name: "", sector: "", initials: "", domain: "", primaryColor: "#0a192f" });
+    setNewPartner({ name: "", sector: "", initials: "", domain: "", primaryColor: "#0a192f", hrAdminEmail: "" });
   };
 
   const handleEditPartner = async (e: React.FormEvent) => {
@@ -76,7 +78,7 @@ export default function AdminPartnersPage() {
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger>
             <Button className="bg-[#0a192f] text-white hover:bg-[#1e3a5f]">
               <Plus className="mr-2 h-4 w-4" /> Ajouter un partenaire
             </Button>
@@ -110,6 +112,18 @@ export default function AdminPartnersPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Domaine d'email corporatif (ex: renault.com)</label>
                 <Input required value={newPartner.domain} onChange={e => setNewPartner({...newPartner, domain: e.target.value})} />
+              </div>
+              <div className="space-y-2 border-t pt-4">
+                <label className="text-sm font-bold text-[#FF6600]">Email Administrateur RH</label>
+                <Input 
+                  type="email" 
+                  placeholder="hr-admin@entreprise.dz" 
+                  required 
+                  value={newPartner.hrAdminEmail} 
+                  onChange={e => setNewPartner({...newPartner, hrAdminEmail: e.target.value})} 
+                  className="border-[#FF6600]/30 focus-visible:ring-[#FF6600]/20"
+                />
+                <p className="text-[10px] text-[#5c6b7a]">Cet utilisateur aura accès aux statistiques détaillées et sautera l'onboarding.</p>
               </div>
               <Button type="submit" className="w-full bg-[#0a192f] text-white font-bold hover:bg-[#1e3a5f]">
                 Enregistrer
@@ -149,6 +163,16 @@ export default function AdminPartnersPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Domaine d'email corporatif</label>
                   <Input required value={editingPartner.domains[0] || ""} onChange={e => setEditingPartner({...editingPartner, domains: [e.target.value]})} />
+                </div>
+                <div className="space-y-2 border-t pt-4">
+                  <label className="text-sm font-bold text-[#FF6600]">Email Administrateur RH</label>
+                  <Input 
+                    type="email" 
+                    required 
+                    value={editingPartner.hrAdminEmail || ""} 
+                    onChange={e => setEditingPartner({...editingPartner, hrAdminEmail: e.target.value})} 
+                    className="border-[#FF6600]/30 focus-visible:ring-[#FF6600]/20"
+                  />
                 </div>
                 <Button type="submit" className="w-full bg-[#0a192f] text-white font-bold hover:bg-[#1e3a5f]">
                   Mettre à jour

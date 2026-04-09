@@ -35,11 +35,8 @@ export function Countdown({ endDate }: { endDate: string }) {
   }, [endDate]);
 
   return (
-    <div className="flex items-center gap-1.5 text-[10px] font-bold text-white bg-black/60 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm">
-      <Clock className="size-3" />
-      <span>
-        {timeLeft.days}j {String(timeLeft.hours).padStart(2, "0")}h {String(timeLeft.minutes).padStart(2, "0")}m {String(timeLeft.seconds).padStart(2, "0")}s
-      </span>
-    </div>
+    <span>
+      {timeLeft.days}j {String(timeLeft.hours).padStart(2, "0")}h {String(timeLeft.minutes).padStart(2, "0")}m {String(timeLeft.seconds).padStart(2, "0")}s
+    </span>
   );
 }

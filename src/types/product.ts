@@ -10,4 +10,6 @@ export type Product = {
   currentParticipants: number;
   endDate: string;
   tenantIds?: string[];
+  maxQuantityPerUser: number;
+  isHero?: boolean;
 };
