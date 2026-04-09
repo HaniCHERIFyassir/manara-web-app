@@ -23,28 +23,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "www.firstshop.co.za",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "**.firstshop.co.za",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "www.pcworld.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "**.unsplash.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "upload.wikimedia.org",
-        pathname: "/**",
+        hostname: "**",
       },
     ],
   },

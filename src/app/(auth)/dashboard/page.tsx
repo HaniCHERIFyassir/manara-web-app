@@ -55,18 +55,26 @@ export default function DashboardPage() {
     <main className="flex-1 space-y-8 p-8 pt-6">
       {/* New Premium Branding Bar */}
       <div
-        className="w-full h-24 mb-6 rounded-2xl overflow-hidden shadow-lg flex items-center px-8 transition-all"
+        className="w-full h-16 md:h-20 mb-6 rounded-2xl overflow-hidden shadow-lg flex items-center px-6 md:px-8 transition-all"
         style={{ backgroundColor: primaryColor }}
       >
         <div className="bg-white px-6 py-2 rounded-xl shadow-md flex items-center justify-center min-w-[140px] h-[60px]">
           {tenant?.logoUrl ? (
             <div className="relative w-32 h-10">
-              <Image
-                src={tenant.logoUrl}
-                alt={tenant.name}
-                fill
-                className="object-contain"
-              />
+              {tenant.logoUrl.startsWith('data:') ? (
+                <img
+                  src={tenant.logoUrl}
+                  alt={tenant.name}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <Image
+                  src={tenant.logoUrl}
+                  alt={tenant.name}
+                  fill
+                  className="object-contain"
+                />
+              )}
             </div>
           ) : (
             <span className="text-2xl font-black" style={{ color: primaryColor }}>{tenant?.name || "M"}</span>
@@ -129,16 +137,25 @@ export default function DashboardPage() {
                 const quantityInCart = cartItem?.quantity || 0;
 
                 return (
-                  <Card className="overflow-hidden border-2 border-red-100 shadow-xl transition-all hover:shadow-2xl">
+                  <Card className="overflow-hidden shadow-xl transition-all hover:shadow-2xl max-w-5xl mx-auto">
                     <div className="flex flex-col md:flex-row">
-                      <div className="relative aspect-video md:w-1/2 overflow-hidden bg-gray-100">
+                      <div className="relative aspect-[16/9] md:w-1/2 overflow-hidden bg-gray-100">
                         <Link href={`/products/${hero.id}`}>
-                          <Image
-                            src={hero.images[0] || "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80"}
-                            alt={hero.name}
-                            fill
-                            className="object-cover transition-transform duration-700 hover:scale-105"
-                          />
+                          {(hero.images[0] || "").startsWith('data:') ? (
+                            <img
+                              src={hero.images[0]}
+                              alt={hero.name}
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                            />
+                          ) : (
+                            <Image
+                              src={hero.images[0] || "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=800&q=80"}
+                              alt={hero.name}
+                              fill
+                              className="object-cover transition-transform duration-700 hover:scale-105"
+                              priority
+                            />
+                          )}
                         </Link>
                       </div>
                       <div className="p-8 md:w-1/2 flex flex-col justify-between space-y-6">
@@ -175,7 +192,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-red-500 transition-all duration-1000"
+                              className="h-full bg-red-500 transition-all duration-1000 progress-active-container"
                               style={{ width: `${Math.min(progress, 100)}%` }}
                             />
                           </div>
@@ -183,7 +200,7 @@ export default function DashboardPage() {
 
                         {quantityInCart === 0 ? (
                           <Button
-                            className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black text-lg shadow-lg shadow-red-200 uppercase tracking-wider"
+                            className="w-full h-14 bg-[#0a192f] hover:bg-[#152a45] text-white font-black text-lg shadow-lg shadow-blue-100 uppercase tracking-wider transition-all"
                             onClick={() => addItem(hero)}
                           >
                             <ShoppingCart className="mr-3 h-6 w-6" />
@@ -225,7 +242,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     {/* RED COUNTDOWN BAR */}
-                    <div className="bg-red-600 py-3 text-center">
+                    <div className="py-3 text-center" style={{ backgroundColor: primaryColor }}>
                       <div className="text-white text-2xl font-black tracking-[0.2em]">
                         <Countdown endDate={hero.endDate} />
                       </div>
@@ -253,13 +270,21 @@ export default function DashboardPage() {
 
                 return (
                   <Card key={product.id} className="group flex flex-col overflow-hidden border-gray-200 bg-white shadow-sm transition-all hover:shadow-xl hover:translate-y-[-4px]">
-                    <Link href={`/products/${product.id}`} className="relative aspect-square overflow-hidden bg-gray-50">
-                      <Image
-                        src={product.images[0] || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"}
-                        alt={product.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+                    <Link href={`/products/${product.id}`} className="relative aspect-video overflow-hidden bg-gray-50 border-b border-gray-100">
+                      {(product.images[0] || "").startsWith('data:') ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <Image
+                          src={product.images[0] || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"}
+                          alt={product.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      )}
                       <div className="absolute top-2 left-2">
                         <Badge className="bg-white/90 backdrop-blur-sm text-[#0a192f] border-none text-[9px] font-bold uppercase">
                           {product.category}
@@ -281,6 +306,9 @@ export default function DashboardPage() {
                           </span>
                         )}
                       </div>
+                      <CardDescription className="text-xs text-[#5c6b7a] line-clamp-2 leading-relaxed">
+                        {product.description}
+                      </CardDescription>
                     </CardHeader>
 
                     <CardContent className="p-4 pt-0 flex-1 flex flex-col justify-end space-y-4">
@@ -291,7 +319,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-red-500 transition-all duration-1000"
+                            className="h-full bg-red-500 transition-all duration-1000 progress-active-container"
                             style={{ width: `${Math.min(progress, 100)}%` }}
                           />
                         </div>
@@ -300,36 +328,36 @@ export default function DashboardPage() {
                       <div className="flex flex-col gap-2 pt-2">
                         {quantityInCart === 0 ? (
                           <Button
-                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-10 uppercase text-xs"
+                            className="w-full bg-[#0a192f] hover:bg-[#152a45] text-white font-bold h-10 uppercase text-xs transition-all shadow-sm"
                             onClick={() => addItem(product)}
                           >
                             <ShoppingCart className="mr-2 h-4 w-4" />
                             Ajouter au panier
                           </Button>
-                        ) : product.maxQuantityPerUser === 1 ? (
-                          <Button
-                            variant="outline"
-                            className="w-full border-red-600 text-red-600 hover:bg-red-50 font-bold h-10 uppercase text-xs"
-                            onClick={() => removeItem(product.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Retirer
-                          </Button>
                         ) : (
-                          <div className="flex items-center justify-between gap-2">
-                            <QuantitySelector
-                              quantity={quantityInCart}
-                              max={product.maxQuantityPerUser}
-                              onChange={(val) => updateQuantity(product.id, val)}
-                            />
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="text-red-500 rounded-full h-8 w-8 hover:bg-red-50"
-                              onClick={() => removeItem(product.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                          <div className="flex flex-col gap-2 bg-red-50 p-2 rounded-xl border border-red-100 relative z-10">
+                            <div className="flex items-center justify-between px-1">
+                              <span className="text-[9px] uppercase font-bold text-red-600">Quantité</span>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                type="button"
+                                className="text-red-500 rounded-full h-7 w-7 hover:bg-red-200/50"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeItem(product.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-center pb-1">
+                              <QuantitySelector
+                                quantity={quantityInCart}
+                                max={product.maxQuantityPerUser}
+                                onChange={(val) => updateQuantity(product.id, val)}
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
